@@ -30,8 +30,10 @@ def diffie_hellman_attack1(message_a, message_b, q, alpha):
     encrypted_b = encrypt(message_b, k_b, initialization_vector)
     decrypted_a = decrypt(encrypted_a, k_mallory, initialization_vector)
     decrypted_b = decrypt(encrypted_b, k_mallory, initialization_vector)
-    print(encrypted_a, encrypted_b)
-    print(decrypted_a, decrypted_b) 
+    print(decrypted_a)
+    print(decrypted_b) 
+
+
 
 def diffie_hellman_attack2(message_a, message_b, q, alpha):
     #alice's private and public keys
@@ -49,25 +51,39 @@ def diffie_hellman_attack2(message_a, message_b, q, alpha):
     # SHA256
     k_a = sha256(str(S_a).encode()).digest()[:16]
     k_b = sha256(str(S_b).encode()).digest()[:16]
+
     k_mallory1 = sha256(str(1).encode()).digest()[:16]
     k_mallory2 = sha256(str(q-1).encode()).digest()[:16]
-
-
-    k_mallory = sha256(str(1).encode()).digest()[:16]
+    k_mallory3 = sha256(str(0).encode()).digest()[:16]
 
     initialization_vector = get_random_bytes(16)
     
     encrypted_a = encrypt(message_a, k_a, initialization_vector)
     encrypted_b = encrypt(message_b, k_b, initialization_vector)
-    #decrypted_a_1 = decrypt(encrypted_a, k_mallory1, initialization_vector)
-    decrypted_a_2 = decrypt(encrypted_a, k_mallory2, initialization_vector)
+    decrypted_a = ''
+    decrypted_b = ''
 
-    #decrypted_b_1 = decrypt(encrypted_b, k_mallory1, initialization_vector)
-    decrypted_b_2 = decrypt(encrypted_b, k_mallory2, initialization_vector)
+    if (q == alpha):
+        k_mallory = sha256(str(0).encode()).digest()[:16]
+        decrypted_a = decrypt(encrypted_a, k_mallory, initialization_vector)
+        decrypted_b = decrypt(encrypted_b, k_mallory, initialization_vector)
+    elif (alpha == 1):
+        k_mallory = sha256(str(1).encode()).digest()[:16]
+        decrypted_a = decrypt(encrypted_a, k_mallory, initialization_vector)
+        decrypted_b = decrypt(encrypted_b, k_mallory, initialization_vector)
+    elif (alpha == q - 1):
+        try:
+            k_mallory = sha256(str(1).encode()).digest()[:16]
+            decrypted_a = decrypt(encrypted_a, k_mallory1, initialization_vector)
+            decrypted_b = decrypt(encrypted_b, k_mallory1, initialization_vector)
+        except:
+            k_mallory = sha256(str(q-1).encode()).digest()[:16]
+            decrypted_a = decrypt(encrypted_a, k_mallory2, initialization_vector)
+            decrypted_b = decrypt(encrypted_b, k_mallory2, initialization_vector)
 
-    print(encrypted_a, encrypted_b)
-    print(decrypted_a_2) 
-    print(decrypted_b_2) 
+    print(decrypted_a)
+    print(decrypted_b)
+
 #same IV, do padding
 def encrypt(message, key, IV):
     cipher = AES.new(key, AES.MODE_CBC, iv=IV)
@@ -75,7 +91,7 @@ def encrypt(message, key, IV):
     block_size = AES.block_size
     message = message.encode()
     counter = 0
-    while counter *16 < len(message):
+    while counter * 16 < len(message):
         chunk = message[counter*16:min((counter+1)*16, len(message))]
         if not chunk:
             break
@@ -88,16 +104,24 @@ def encrypt(message, key, IV):
 
 def decrypt(ciphertext, key, IV):
     cipher = AES.new(key, AES.MODE_CBC, iv=IV)
-    return cipher.decrypt(ciphertext).decode()
+    return cipher.decrypt(ciphertext).decode().strip()
 
 def main():
     message_a = "Hi Bob"
     message_b = "Hi Aleez"
+    print("#####################################")
+    print("              PART 1")
     diffie_hellman_attack1(message_a, message_b, 37, 5)
+    print("#####################################")
 
-    #part 2
+    print("              PART 2")
+    print("alpha = 1:")
+    diffie_hellman_attack2(message_a, message_b, 37, 1)
+    print("alpha = q:")
+    diffie_hellman_attack2(message_a, message_b, 37, 37)
+    print("alpha = q-1:")
     diffie_hellman_attack2(message_a, message_b, 37, 36)
-
+    print("#####################################")
 
 
 main()
