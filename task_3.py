@@ -1,4 +1,9 @@
 from Cryptodome.Util import number
+from hashlib import sha256
+from Cryptodome.Cipher import AES
+from Cryptodome.Random import get_random_bytes
+from Cryptodome.Util.Padding import pad, unpad
+from task_2 import encrypt, decrypt
 
 # Part 1: implement RSA from scratch
 def key_generation(bits):
@@ -46,11 +51,20 @@ def main():
     print(decrypted)
 
     #Part 2: mallory manipulates ciphertext
-        # 1. generate RSA keys for Alice and Bob
-        # 2. mallory intercepts ciphertext
-        # 3. alice gets corrupted ciphertext
-
-main()
+    initialization_vector = get_random_bytes(16)
+    public, private = key_generation(bits)
+    message2 = "Hi Bob"
+    cprime = 0
+    d, n = private
+    s_alice = pow(cprime, d, n)
+    k_a = sha256(str(s_alice).encode()).digest()[:16]
+    encrypted = encrypt(message2, k_a, initialization_vector)
+    k_m = sha256(str(0).encode()).digest()[:16]
+    decrypted = decrypt(encrypted, k_m, initialization_vector)
+    print(decrypted)
+    
+if __name__ == "__main__":
+    main()
 
 
 
