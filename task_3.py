@@ -33,6 +33,10 @@ def RSA_decryption(ciphertext, private_key):
     d, n = private_key
     return pow(ciphertext, d, n)
 
+
+def RSA_attack(c, e, n, modification_factor):
+    return (c * modification_factor) % n
+
 def main():
     bits = 2048
     message = 4567890876543445678945678796543424567890
@@ -40,7 +44,14 @@ def main():
     ciphertext = RSA_encryption(message, public_key)
     decrypted = RSA_decryption(ciphertext, private_key)
     print(decrypted)
+
+    #Part 2: mallory manipulates ciphertext
+        # 1. generate RSA keys for Alice and Bob
+        # 2. mallory intercepts ciphertext
+        # 3. alice gets corrupted ciphertext
+
 main()
 
 
-# Part 2: demonstrate an MITM attack where attacker manipulates ciphertext to alter or decrypt message
+
+
